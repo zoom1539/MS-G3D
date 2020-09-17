@@ -108,3 +108,21 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+.vscode
+pretrained-models
+eval
+data_gen/screenlog.0
+data/ntu/xsub/train_data_bone.npy
+data/ntu/xsub/train_data_joint.npy
+data/ntu/xsub/train_label.pkl
+data/ntu/xsub/val_data_bone.npy
+data/ntu/xsub/val_data_joint.npy
+data/ntu/xsub/val_label.pkl
+data/ntu/xview/train_data_bone.npy
+data/ntu/xview/train_data_joint.npy
+data/ntu/xview/train_label.pkl
+data/ntu/xview/val_data_bone.npy
+data/ntu/xview/val_data_joint.npy
+data/ntu/xview/val_label.pkl
+data/nturgbd_raw/nturgb+d_skeletons
+screenlog.0
