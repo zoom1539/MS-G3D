@@ -126,3 +126,4 @@ data/ntu/xview/val_data_joint.npy
 data/ntu/xview/val_label.pkl
 data/nturgbd_raw/nturgb+d_skeletons
 screenlog.0
+test_grammar.py
