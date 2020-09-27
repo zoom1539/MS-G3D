@@ -10,6 +10,7 @@ import torch.nn.functional as F
 from utils import import_class, count_params
 from model.ms_gcn import MultiScale_GraphConv as MS_GCN
 from model.ms_tcn import MultiScale_TemporalConv as MS_TCN
+from model.lstm import LSTM
 from model.ms_gtcn import SpatialTemporal_MS_GCN, UnfoldTemporalWindows
 from model.mlp import MLP
 from model.activation import activation_factory
@@ -119,9 +120,9 @@ class Model(nn.Module):
         self.data_bn = nn.BatchNorm1d(num_person * in_channels * num_point)
 
         # channels
-        c1 = 96
-        c2 = c1 * 2     # 192
-        c3 = c2 * 2     # 384
+        c1 = 96          # 96
+        c2 = c1 #* 2     # 192
+        c3 = c2 #* 2     # 384
 
         # r=3 STGC blocks
         self.gcn3d1 = MultiWindow_MS_G3D(3, c1, A_binary, num_g3d_scales, window_stride=1)
@@ -130,7 +131,8 @@ class Model(nn.Module):
             MS_TCN(c1, c1),
             MS_TCN(c1, c1))
         self.sgcn1[-1].act = nn.Identity()
-        self.tcn1 = MS_TCN(c1, c1)
+        # self.tcn1 = MS_TCN(c1, c1)
+        self.lstm1 = LSTM(c1, keypoint_size=num_point, num_layers=2)
 
         self.gcn3d2 = MultiWindow_MS_G3D(c1, c2, A_binary, num_g3d_scales, window_stride=2)
         self.sgcn2 = nn.Sequential(
@@ -138,7 +140,8 @@ class Model(nn.Module):
             MS_TCN(c1, c2, stride=2),
             MS_TCN(c2, c2))
         self.sgcn2[-1].act = nn.Identity()
-        self.tcn2 = MS_TCN(c2, c2)
+        # self.tcn2 = MS_TCN(c2, c2)
+        self.lstm2 = LSTM(c2, keypoint_size=num_point, num_layers=2)
 
         self.gcn3d3 = MultiWindow_MS_G3D(c2, c3, A_binary, num_g3d_scales, window_stride=2)
         self.sgcn3 = nn.Sequential(
@@ -146,7 +149,8 @@ class Model(nn.Module):
             MS_TCN(c2, c3, stride=2),
             MS_TCN(c3, c3))
         self.sgcn3[-1].act = nn.Identity()
-        self.tcn3 = MS_TCN(c3, c3)
+        # self.tcn3 = MS_TCN(c3, c3)
+        self.lstm3 = LSTM(c3, keypoint_size=num_point, num_layers=2)
 
         self.fc = nn.Linear(c3, num_class)
 
@@ -156,15 +160,33 @@ class Model(nn.Module):
         x = self.data_bn(x)
         x = x.view(N * M, V, C, T).permute(0,2,3,1).contiguous()
 
+        # print('0 : ', x.size())
+        # # Apply activation to the sum of the pathways
+        # x = F.relu(self.sgcn1(x) + self.gcn3d1(x), inplace=True)
+        # print('1 in: ', x.size())
+        # x = self.tcn1(x)
+        # print('1 out: ', x.size())
+
+        # x = F.relu(self.sgcn2(x) + self.gcn3d2(x), inplace=True)
+        # print('2 in: ', x.size())
+        # x = self.tcn2(x)
+        # print('2 out: ', x.size())
+
+        # x = F.relu(self.sgcn3(x) + self.gcn3d3(x), inplace=True)
+        # print('3 in: ', x.size())
+        # x = self.tcn3(x)
+        # print('3 out: ', x.size())
+        # input()
+
         # Apply activation to the sum of the pathways
         x = F.relu(self.sgcn1(x) + self.gcn3d1(x), inplace=True)
-        x = self.tcn1(x)
+        x = self.lstm1(x)
 
         x = F.relu(self.sgcn2(x) + self.gcn3d2(x), inplace=True)
-        x = self.tcn2(x)
+        x = self.lstm2(x)
 
         x = F.relu(self.sgcn3(x) + self.gcn3d3(x), inplace=True)
-        x = self.tcn3(x)
+        x = self.lstm3(x)
 
         out = x
         out_channels = out.size(1)
