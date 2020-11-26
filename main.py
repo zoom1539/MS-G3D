@@ -38,7 +38,7 @@ def get_parser():
     parser.add_argument(
         '--work-dir',
         type=str,
-        required=True,
+        default='./work_dir/zjlab_action/msg3d_joint',
         help='the work folder for storing results')
     parser.add_argument('--model_saved_name', default='')
     parser.add_argument(

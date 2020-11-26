@@ -37,9 +37,13 @@ class Processor():
 
         #
         for video_path in video_paths:
+            print(video_path)
             #
+            # video_path = '/data1/dataset/zjlab_indoor_actions/videos/snippet_cam_2_4.avi'
+            
             video = self.read_video(video_path)
             
+            print('read done')
             #
             label_path = video_path.replace(
                 'videos', 'labels').replace('avi', 'xml')
@@ -87,6 +91,7 @@ class Processor():
             if cnt % 1000 == 0:
                 print(cnt)
         cap.release()
+
         return video
 
     def generate_video(self, frames, fps, resolution, save_path):
@@ -103,12 +108,12 @@ def get_parser():
 
     parser.add_argument(
         '--dataset_dir',
-        default='/data1/zhumh/test/zjlab_indoor_actions',
+        default='/data1/zhumh/tmp',
         type=str,
         help='dataset directory')
     parser.add_argument(
         '--work_dir',
-        default='/data1/zhumh/test/zjlab_action_segments',
+        default='/data1/zhumh/tmp/work_dir',
         type=str,
         help='work directory')
 

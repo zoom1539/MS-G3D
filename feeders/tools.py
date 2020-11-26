@@ -42,6 +42,7 @@ def auto_pading(data_numpy, size, random_pad=False):
 
 def random_choose(data_numpy, size, auto_pad=True):
     C, T, V, M = data_numpy.shape
+    
     if T == size:
         return data_numpy
     elif T < size:
